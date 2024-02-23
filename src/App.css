@@ -1,0 +1,23 @@
+body{
+    text-align: center; 
+    ;
+}
+.container{
+     margin-left: 10%; margin-right: 10%; background-color: rgb(238, 246, 248); min-height: 550px; border-color: black; border-spacing: 10%; border-width: 10px;
+
+}
+input{
+    height: 20px; width: 250px; border-radius: 5px;
+}
+button{
+    color: white; background-color: rgb(177, 44, 44); margin: 20px; border-radius: 5px; padding: 5px 5px;
+}
+.deletebutton{
+    margin-left: 30%;
+}
+ul{
+    margin: 0;
+}
+li{
+    list-style-type: none; background-color: rgb(182, 245, 224); margin-top: 5px; border-radius: 10px; font-weight: bolder; text-align: left; height: 50px;
+}
