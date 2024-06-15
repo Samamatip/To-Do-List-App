@@ -1,58 +1,127 @@
-import React, {useState, useEffect} from "react";
+import { useState } from 'react';
 import './App.css';
+import { getTodo, updateTodo, deleteTodo, createTodo } from './services';
+import { useFetch } from "./utilities";
 
-function App(){
-
+function App() {
+    const [loading, setLoading] = useState(false);
     const [tasks, setTasks] = useState([]);
-    const [newTask, setNewTask] = useState('');
+    const [expandedTaskId, setExpandedTaskId] = useState(null);
+    const [todo, setTodo] = useState({
+        title: "",
+        description: "",
+        dueTime: "",
+        completed: false,
+    });
 
-    useEffect(()=>{ 
-        setTasks(['To learn programming.', 'To go to work'])
-    }, []);
+    useFetch(getTodo, setTasks, setLoading);
 
-    const addTask = () => {
-
-        if(newTask){
-            setTasks([...tasks, newTask]);
-            setNewTask('');
+    const deleteTask = async (listId) => {
+        try {
+            await deleteTodo(listId);
+            setTasks(tasks.filter(task => task._id !== listId));
+        } catch (err) {
+            console.error('Error in deleting task', err);
         }
+    };
 
-    }
+    const saveTasks = async (event) => {
+        event.preventDefault();
+        try {
+            const newTask = await createTodo(todo);
+            setTasks([...tasks, newTask]);
+            setTodo({
+                title: "",
+                description: "",
+                dueTime: "",
+                completed: false,
+            });
+        } catch (err) {
+            console.error('Error in creating task', err);
+        }
+    };
 
-    const deleteTask = (index) => {
-        const copyTask = tasks.slice();
-        copyTask.splice(index, 1);
-        setTasks(copyTask);
+    const updateTask = async (listId, updatedTodo) => {
+        try {
+            const updatedTask = await updateTodo(listId, updatedTodo);
+            setTasks(tasks.map(task => (task._id === listId ? updatedTask : task)));
+        } catch (err) {
+            console.error('Error in updating task', err);
+        }
+    };
 
+    const handleChange = (event) => {
+        const { name, value, type, checked } = event.target;
+        setTodo(prevData => ({
+            ...prevData,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
 
-    }
+    const toggleTaskDetails = (taskId) => {
+        setExpandedTaskId(prevId => (prevId === taskId ? null : taskId));
+    };
+
+    if (loading) return <div>Loading...</div>;
+
     return (
-        <div className="container"> 
+        <div className="container">
             <div className="innerContainer">
-            <h1>
-                Sammy To-Do List App
-            </h1>
-            <input 
-            type="text"
-            value={newTask}
-            placeholder='Enter New Task Here' 
-            onChange={(e)=> setNewTask(e.target.value)}/>
-            <button onClick={addTask}>Add New Task</button>
-
-            <ul>
-                {tasks.map((task, index) => (
-            
-            <li key={index}>
-                {task} 
-                <button className ='deletebutton' onClick={() => deleteTask(index)}>Delete</button>
-                
-            </li>
-            
-            ))}
-                
-            </ul>
+                <h1>Sammy To-Do List App</h1>
+                <form onSubmit={saveTasks}>
+                    <input
+                        className='title'
+                        name="title"
+                        type="text"
+                        value={todo.title}
+                        placeholder='Enter Task title'
+                        onChange={handleChange}
+                    />
+                    <br></br>
+                    <textarea
+                        className='task-description'
+                        name="description"
+                        type="text"
+                        value={todo.description}
+                        placeholder='Enter Task description'
+                        onChange={handleChange}
+                    />
+                    <br></br>
+                    <label htmlFor='dueTime'>Due Time:</label>
+                    <input
+                        id='dueTime'
+                        name="dueTime"
+                        type="datetime-local"
+                        value={todo.dueTime}
+                        placeholder='Enter Due Time'
+                        onChange={handleChange}
+                    /><br></br>
+                    <button type='submit'>Add New Task</button>
+                </form>
+                <ul>
+                    {tasks.map((task) => (
+                        <li key={task._id}>
+                            <div 
+                            className='head'
+                            onClick={() => toggleTaskDetails(task._id)}
+                            >
+                                <span>{task.title}</span>
+                                <span>{new Date(task.dueTime).toLocaleString()}</span>
+                            </div>
+                            {expandedTaskId === task._id && (
+                                <div className='expanded'>
+                                    <p className='description'>{task.description}</p>
+                                    <p>Completed: {task.completed ? 'Yes' : 'No'}</p>
+                                    <button className='deletebutton' onClick={() => deleteTask(task._id)}>Delete</button>
+                                    <button className='updatebutton' onClick={() => updateTask(task._id, { ...task, completed: !task.completed })}>
+                                        {task.completed ? 'Mark as Incomplete' : 'Mark as Complete'}
+                                    </button>
+                                </div>
+                            )}
+                        </li>
+                    ))}
+                </ul>
             </div>
-
         </div>
     );
 }
