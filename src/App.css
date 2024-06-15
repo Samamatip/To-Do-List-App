@@ -3,7 +3,7 @@ body{
     ;
 }
 .container{
-     margin-left: 10%; margin-right: 10%; background-color: rgb(238, 246, 248); min-height: 550px; border-color: black; border-spacing: 10%; border-width: 10px;
+     margin-left: 10%; margin-right: 10%; background-color: rgb(238, 246, 248); min-height: 550px;
 
 }
 input{
