@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import './App.css';
 import { getTodo, updateTodo, deleteTodo, createTodo } from './services';
-import { useFetch } from "./utilities";
+import { useFetch } from './utilities';
 
 function App() {
     const [loading, setLoading] = useState(false);
-    const [tasks, setTasks] = useState([]);
+    const [tasks, setTasks] = useState([ ]);
     const [expandedTaskId, setExpandedTaskId] = useState(null);
     const [todo, setTodo] = useState({
         title: "",
@@ -16,10 +16,10 @@ function App() {
 
     useFetch(getTodo, setTasks, setLoading);
 
-    const deleteTask = async (listId) => {
+    const deleteTask = async (taskId) => {
         try {
-            await deleteTodo(listId);
-            setTasks(tasks.filter(task => task._id !== listId));
+            await deleteTodo(taskId);
+            setTasks(tasks.filter(task => task._id !== taskId));
         } catch (err) {
             console.error('Error in deleting task', err);
         }
@@ -27,6 +27,10 @@ function App() {
 
     const saveTasks = async (event) => {
         event.preventDefault();
+        if (!todo.title || !todo.description || !todo.dueTime) {
+            alert('Please fill in all fields');
+            return;
+        }
         try {
             const newTask = await createTodo(todo);
             setTasks([...tasks, newTask]);
@@ -41,10 +45,10 @@ function App() {
         }
     };
 
-    const updateTask = async (listId, updatedTodo) => {
+    const updateTask = async (taskId, updatedTodo) => {
         try {
-            const updatedTask = await updateTodo(listId, updatedTodo);
-            setTasks(tasks.map(task => (task._id === listId ? updatedTask : task)));
+            const updatedTask = await updateTodo(taskId, updatedTodo);
+            setTasks(tasks.map(task => (task._id === taskId ? updatedTask : task)));
         } catch (err) {
             console.error('Error in updating task', err);
         }
@@ -76,34 +80,35 @@ function App() {
                         value={todo.title}
                         placeholder='Enter Task title'
                         onChange={handleChange}
+                        required
                     />
-                    <br></br>
+                    <br />
                     <textarea
                         className='task-description'
                         name="description"
-                        type="text"
                         value={todo.description}
                         placeholder='Enter Task description'
                         onChange={handleChange}
+                        required
                     />
-                    <br></br>
+                    <br />
                     <label htmlFor='dueTime'>Due Time:</label>
                     <input
                         id='dueTime'
                         name="dueTime"
                         type="datetime-local"
                         value={todo.dueTime}
-                        placeholder='Enter Due Time'
                         onChange={handleChange}
-                    /><br></br>
+                        required
+                    /><br />
                     <button type='submit'>Add New Task</button>
                 </form>
                 <ul>
                     {tasks.map((task) => (
                         <li key={task._id}>
                             <div 
-                            className='head'
-                            onClick={() => toggleTaskDetails(task._id)}
+                                className='head'
+                                onClick={() => toggleTaskDetails(task._id)}
                             >
                                 <span>{task.title}</span>
                                 <span>{new Date(task.dueTime).toLocaleString()}</span>

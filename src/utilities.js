@@ -5,8 +5,8 @@ export const useFetch = (fetchFunction, setData, setLoading) => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const result = await fetchFunction();
-                setData(result);
+                const response = await fetchFunction();
+                setData(response);
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
